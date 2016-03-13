@@ -1,0 +1,18 @@
+{
+  "author": "4ok",
+  "name": "app-api",
+  "version": "0.0.0",
+  "engines": {
+    "node": ">=4.0.0"
+  },
+  "dependencies": {
+    "q": "^1.4.1",
+    "lodash": "^3.10.1",
+    "joi": "^6.9.1",
+    "mongojs": "^1.4.1",
+    "break-promise": "git+https://github.com/4ok/break-promise.git",
+    "controller-abstract": "git+https://github.com/4ok/controller-abstract.git",
+    "db": "git+https://github.com/4ok/db.git"
+  },
+  "private": true
+}
