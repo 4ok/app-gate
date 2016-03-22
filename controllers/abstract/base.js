@@ -411,13 +411,21 @@ module.exports = class {
                 modelName = this._getModelName();
             }
 
-            this._response.send404([
+            throw new Error([
                 error + '.',
                 'Model:',
                 modelName + '.',
                 'Filter:',
                 JSON.stringify(options)
             ].join(' '));
+
+            //this._response.send404([
+            //    error + '.',
+            //    'Model:',
+            //    modelName + '.',
+            //    'Filter:',
+            //    JSON.stringify(options)
+            //].join(' '));
         }
     }
 

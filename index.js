@@ -1,6 +1,7 @@
 'use strict';
 
 const logger = require('logger')();
+const q      = require('q');
 
 module.exports = class {
 
@@ -9,62 +10,50 @@ module.exports = class {
 
         if (typeof arguments[0] == 'object') {
             const methods = arguments[0];
-            let promises  = [];
-            let equals    = [];
+            const names   = Object.keys(methods);
 
-            Object
-                .keys(methods)
-                .forEach((key, i) => {
-                    const method  = methods[key];
-                    const promise = this._callOneMethod(method.name, method.args);
-                    equals[i]   = key;
+            const promises = names.reduce((result, key) => {
+                const method  = (typeof methods[key] == 'function')
+                    ? methods[key]()
+                    : methods[key];
 
-                    promises.push(promise);
-                });
+                const promise = this._callOneMethod(method.name, method.args);
+
+                result.push(promise);
+
+                return result;
+            }, []);
 
             result = q
                 .all(promises)
                 .then((data) => {
-                    let result = {};
 
-                    data.forEach((item, i) => {
-                        result[equals[i]] = item;
-                    });
+                    return data.reduce((result, item, index) => {
+                        result[names[index]] = item;
 
-                    return result;
-                })
-                .fail(this._onPromiseFail);
+                        return result;
+                    }, {});
+                });
         } else {
             const name = arguments[0];
             const args = arguments[1];
 
-            result = this
-                ._callOneMethod(name, args)
-                .fail(this._onPromiseFail);
+            result = this._callOneMethod(name, args)
         }
 
         return result;
-    }
-
-    _onPromiseFail(err) {
-        const message = (err.getMessage)
-            ? err.getMessage()
-            : (err.stack || err);
-
-        logger.error(message);
     }
 
     _callOneMethod(name, args) {
         const methodTypeSep = ':';
 
         if (name.indexOf(methodTypeSep) === -1) {
-            throw new Error('Gate method type not found. Method: "' + name + '"');
+            throw new Error('Do not specify the type of the method. Method: "' + name + '"');
         }
 
         const method       = name.split(':');
         const methodType   = method[0];
         const methodParams = method[1].split('/');
-
         let result;
 
         args = args || {};
