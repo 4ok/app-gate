@@ -6,6 +6,10 @@ const Data   = require('app-data');
 
 module.exports = class {
 
+    constructor() {
+        this._resources = {};
+    }
+
     callMethod() {
         let result;
 
@@ -20,7 +24,7 @@ module.exports = class {
                     method = method();
                 }
 
-                const promise = this._callOneMethod(method.name, method.args);
+                const promise = this._callResourceMethod(method.name, method.args);
 
                 return result.concat(promise);
             }, []);
@@ -36,13 +40,13 @@ module.exports = class {
             const name = arguments[0];
             const args = arguments[1];
 
-            result = this._callOneMethod(name, args)
+            result = this._callResourceMethod(name, args)
         }
 
         return result;
     }
 
-    _callOneMethod(name, args) {
+    _callResourceMethod(name, args) {
         const resourceSep = ':';
 
         if (name.indexOf(resourceSep) === -1) {
@@ -53,9 +57,12 @@ module.exports = class {
         const resourceName = nameParams[0];
         const method       = nameParams[1];
 
-        const Resource = require('./resources/' + resourceName);
-        const resource = new Resource();
+        if (!this._resources[resourceName]) {
+            const Resource = require('./resources/' + resourceName);
 
-        return resource.call(method, args || {});
+            this._resources[resourceName] = new Resource();
+        }
+
+        return this._resources[resourceName].call(method, args || {});
     }
 };

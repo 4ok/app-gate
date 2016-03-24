@@ -4,9 +4,11 @@ const Data = require('app-data');
 
 module.exports = class {
 
-    call(method, args) {
-        const data = new Data();
+    constructor() {
+        this._data = new Data();
+    }
 
-        return data.callMethod(method, args);
+    call(method, args) {
+        return this._data.callMethod(method, args);
     }
 };
