@@ -1,7 +1,6 @@
 'use strict';
 
-const logger = require('logger')();
-const q      = require('q');
+const q = require('q');
 
 module.exports = class {
 

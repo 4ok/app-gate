@@ -7,12 +7,7 @@
   },
   "dependencies": {
     "q": "^1.4.1",
-    "lodash": "^4.6.1",
-    "joi": "^8.0.4",
-    "mongojs": "^2.3.0",
-    "break-promise": "git+https://github.com/4ok/break-promise.git",
-    "controller-abstract": "git+https://github.com/4ok/controller-abstract.git",
-    "db": "git+https://github.com/4ok/db.git"
+    "app-data": "git+https://github.com/4ok/app-data.git"
   },
   "private": true
 }
