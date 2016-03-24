@@ -1,6 +1,8 @@
 'use strict';
 
-const q = require('q');
+const logger = require('logger')();
+const q      = require('q');
+const Data   = require('app-data');
 
 module.exports = class {
 
@@ -12,27 +14,24 @@ module.exports = class {
             const names   = Object.keys(methods);
 
             const promises = names.reduce((result, key) => {
-                const method  = (typeof methods[key] == 'function')
-                    ? methods[key]()
-                    : methods[key];
+                let method = methods[key];
+
+                if (typeof method == 'function') {
+                    method = method();
+                }
 
                 const promise = this._callOneMethod(method.name, method.args);
 
-                result.push(promise);
-
-                return result;
+                return result.concat(promise);
             }, []);
 
             result = q
                 .all(promises)
-                .then((data) => {
+                .then(data => data.reduce((result, item, index) => {
+                    result[names[index]] = item;
 
-                    return data.reduce((result, item, index) => {
-                        result[names[index]] = item;
-
-                        return result;
-                    }, {});
-                });
+                    return result;
+                }, {}));
         } else {
             const name = arguments[0];
             const args = arguments[1];
@@ -52,23 +51,25 @@ module.exports = class {
 
         const method       = name.split(':');
         const methodType   = method[0];
-        const methodParams = method[1].split('/');
+        const methodParams = method[1];
         let result;
 
         args = args || {};
 
         switch (methodType) {
             case 'base': {
-                const controller = methodParams[0];
-                const action     = methodParams[1] || 'index';
+                const data = new Data();
 
-                result = this._callController(controller, action, args);
+                result = data.callMethod(methodParams, args);
+
                 break;
             }
             default: {
                 throw new Error('Gate method type "'
                     + methodType
-                    + '" not found. Method: "' + name + '"'
+                    + '" not found. Method: "'
+                    + name
+                    + '"'
                 );
             }
         }
