@@ -43,45 +43,19 @@ module.exports = class {
     }
 
     _callOneMethod(name, args) {
-        const methodTypeSep = ':';
+        const resourceSep = ':';
 
-        if (name.indexOf(methodTypeSep) === -1) {
+        if (name.indexOf(resourceSep) === -1) {
             throw new Error('Do not specify the type of the method. Method: "' + name + '"');
         }
 
-        const method       = name.split(':');
-        const methodType   = method[0];
-        const methodParams = method[1];
-        let result;
+        const nameParams   = name.split(':');
+        const resourceName = nameParams[0];
+        const method       = nameParams[1];
 
-        args = args || {};
+        const Resource = require('./resources/' + resourceName);
+        const resource = new Resource();
 
-        switch (methodType) {
-            case 'base': {
-                const data = new Data();
-
-                result = data.callMethod(methodParams, args);
-
-                break;
-            }
-            default: {
-                throw new Error('Gate method type "'
-                    + methodType
-                    + '" not found. Method: "'
-                    + name
-                    + '"'
-                );
-            }
-        }
-
-        return result;
-    }
-
-    _callController(controllerName, actionName, args) {
-        const controllersPath = './controllers/' + controllerName;
-        const Controller      = require(controllersPath);
-        const controller      = new Controller();
-
-        return controller[actionName + 'Action'](args);
+        return resource.call(method, args || {});
     }
 };
