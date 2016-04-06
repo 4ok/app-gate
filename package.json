@@ -9,5 +9,12 @@
     "q": "^1.4.1",
     "app-data": "git+https://github.com/4ok/app-data.git"
   },
-  "private": true
+  "private": true,
+  "scripts": {
+    "test": "node_modules/.bin/eslint ."
+  },
+  "devDependencies": {
+    "eslint": "^2.7.0",
+    "eslint-config-airbnb": "^6.2.0"
+  }
 }
