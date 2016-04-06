@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "q": "^1.4.1",
-    "app-data": "git+https://github.com/4ok/app-data.git"
+    "app-data": "git://github.com/4ok/app-data.git"
   },
   "private": true,
   "scripts": {
@@ -15,6 +15,6 @@
   },
   "devDependencies": {
     "eslint": "^2.7.0",
-    "eslint-config-4ok": "4ok/eslint-config-4ok"
+    "eslint-config-4ok": "git://github.com/4ok/eslint-config-4ok"
   }
 }
