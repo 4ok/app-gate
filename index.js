@@ -8,11 +8,11 @@ module.exports = class {
         this._resources = {};
     }
 
-    callMethod() {
+    callMethod(...args) {
         let result;
 
-        if (typeof arguments[0] === 'object') {
-            const methods = arguments[0];
+        if (typeof args[0] === 'object') {
+            const methods = args[0];
             const names = Object.keys(methods);
 
             const promises = names.reduce((prev, key) => {
@@ -35,10 +35,10 @@ module.exports = class {
                     return prev;
                 }, {}));
         } else {
-            const name = arguments[0];
-            const args = arguments[1];
+            const method = args[0];
+            const params = args[1];
 
-            result = this._callResourceMethod(name, args);
+            result = this._callResourceMethod(method, params);
         }
 
         return result;
@@ -48,7 +48,7 @@ module.exports = class {
         const resourceSep = ':';
 
         if (name.indexOf(resourceSep) === -1) {
-            throw new Error('Do not specify the type of the method. Method: "' + name + '"');
+            throw new Error(`Do not specify the type of the method. Method: "${name}"`);
         }
 
         const nameParams = name.split(':');
