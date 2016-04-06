@@ -8,11 +8,11 @@ module.exports = class {
         this._resources = {};
     }
 
-    callMethod(...args) {
+    callMethod() {
         let result;
 
-        if (typeof args[0] === 'object') {
-            const methods = args[0];
+        if (typeof arguments[0] === 'object') {
+            const methods = arguments[0];
             const names = Object.keys(methods);
 
             const promises = names.reduce((prev, key) => {
@@ -35,10 +35,10 @@ module.exports = class {
                     return prev;
                 }, {}));
         } else {
-            const method = args[0];
-            const params = args[1];
+            const method = arguments[0];
+            const args = arguments[1];
 
-            result = this._callResourceMethod(method, params);
+            result = this._callResourceMethod(method, args);
         }
 
         return result;
