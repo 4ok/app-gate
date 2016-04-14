@@ -9,12 +9,12 @@
     "q": "^1.4.1",
     "app-data": "git://github.com/4ok/app-data.git"
   },
-  "private": true,
-  "scripts": {
-    "test": "node_modules/.bin/eslint ."
-  },
   "devDependencies": {
     "eslint": "^2.7.0",
     "eslint-config-4ok": "git://github.com/4ok/eslint-config-4ok"
-  }
+  },
+  "scripts": {
+    "lint": "node_modules/.bin/eslint ."
+  },
+  "private": true
 }
