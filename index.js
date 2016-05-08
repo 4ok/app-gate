@@ -1,7 +1,5 @@
 'use strict';
 
-const q = require('q');
-
 module.exports = class {
 
     constructor() {
@@ -27,7 +25,7 @@ module.exports = class {
                 return prev.concat(promise);
             }, []);
 
-            result = q
+            result = Promise
                 .all(promises)
                 .then(data => data.reduce((prev, item, index) => {
                     prev[names[index]] = item;
