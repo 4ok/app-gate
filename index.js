@@ -1,5 +1,3 @@
-'use strict';
-
 module.exports = class {
 
     constructor() {
@@ -54,6 +52,7 @@ module.exports = class {
         const method = nameParams[1];
 
         if (!this._resources[resourceName]) {
+            // eslint-disable-next-line global-require
             const Resource = require('./resources/' + resourceName);
 
             this._resources[resourceName] = new Resource();

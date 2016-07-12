@@ -1,5 +1,3 @@
-'use strict';
-
 const Data = require('app-data');
 
 module.exports = class {
