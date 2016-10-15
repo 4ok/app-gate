@@ -9,26 +9,21 @@ module.exports = class {
 
         if (typeof arguments[0] === 'object') {
             const methods = arguments[0];
-            const names = Object.keys(methods);
+            const aliases = Object.keys(methods);
 
-            const promises = names.reduce((prev, key) => {
-                let method = methods[key];
-
-                if (typeof method === 'function') {
-                    method = method();
-                }
-
+            const promises = aliases.reduce((result, alias) => {
+                const method = methods[alias];
                 const promise = this._callResourceMethod(method.name, method.args);
 
-                return prev.concat(promise);
+                return result.concat(promise);
             }, []);
 
             result = Promise
                 .all(promises)
-                .then(data => data.reduce((prev, item, index) => {
-                    prev[names[index]] = item;
+                .then(data => data.reduce((result, item, index) => {
+                    result[aliases[index]] = item;
 
-                    return prev;
+                    return result;
                 }, {}));
         } else {
             const method = arguments[0];
