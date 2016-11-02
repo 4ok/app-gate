@@ -13,7 +13,7 @@ module.exports = class {
 
             const promises = aliases.reduce((result, alias) => {
                 const method = methods[alias];
-                const promise = this._callResourceMethod(method.name, method.args);
+                const promise = this._callResourceMethod(method);
 
                 return result.concat(promise);
             }, []);
@@ -26,33 +26,44 @@ module.exports = class {
                     return result;
                 }, {}));
         } else {
-            const method = arguments[0];
-            const args = arguments[1];
+            const [name, args] = arguments; // TODO: guard
 
-            result = this._callResourceMethod(method, args);
+            result = this._callResourceMethod({
+                name,
+                args
+            });
         }
 
         return result;
     }
 
-    _callResourceMethod(name, args) {
+    _callResourceMethod(method) {
         const resourceSep = ':';
+        const rawName = method.name;
+        let result;
 
-        if (name.indexOf(resourceSep) === -1) {
-            throw new Error(`Do not specify the type of the method. Method: "${name}"`);
+        if (rawName.indexOf(resourceSep) === -1) {
+            throw new Error(`Do not specify the type of the method. Method: "${rawName}"`);
         }
 
-        const nameParams = name.split(':');
-        const resourceName = nameParams[0];
-        const method = nameParams[1];
+        if (method.guard === undefined || method.guard) {
+            const rawNameParams = rawName.split(':');
+            const resourceName = rawNameParams[0];
+            const methodName = rawNameParams[1];
 
-        if (!this._resources[resourceName]) {
-            // eslint-disable-next-line global-require
-            const Resource = require('./resources/' + resourceName);
+            if (!this._resources[resourceName]) {
+                // eslint-disable-next-line global-require
+                const Resource = require('./resources/' + resourceName);
 
-            this._resources[resourceName] = new Resource();
+                this._resources[resourceName] = new Resource();
+            }
+
+            result = this._resources[resourceName].call(methodName, method.args || {});
+        } else {
+            console.info(`The method "${rawName}" wasn't call`, method); // TODO
+            result = Promise.resolve(); // TODO
         }
 
-        return this._resources[resourceName].call(method, args || {});
+        return result;
     }
 };
