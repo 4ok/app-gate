@@ -60,7 +60,7 @@ module.exports = class {
 
             result = this._resources[resourceName].call(methodName, method.args || {});
         } else {
-            console.info(`The method "${rawName}" wasn't call`, method); // TODO
+            console.info(`Guard: the method "${rawName}" didn't call`, method); // TODO
             result = Promise.resolve(); // TODO
         }
 
