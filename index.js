@@ -1,26 +1,26 @@
 const logger = require('logger')();
+const Resource = require('./components/resource');
+const resource = new Resource();
 
 module.exports = class {
 
-    constructor() {
-        this._resources = {};
-    }
+    callMethods(methods) {
+        this._methods = methods;
 
-    callMethod() {
-        this._methods = arguments[0];
+        // todo
         this._methodsData = {};
 
-        const methodsAliasesLevels = this._getMethodsAliasesLevels();
+        const dataAliasesLevels = this._getDataAliasesLevels();
         let result = Promise.resolve();
 
-        methodsAliasesLevels.forEach(methodsAliases => {
+        dataAliasesLevels.forEach(dataAliases => {
             result = result
                 .then(() => Promise.all(
-                    this._callMethodsLevel(methodsAliases)
+                    this._callMethods(dataAliases)
                 ))
                 .then(items => {
                     items.forEach((item, index) => {
-                        const methodAlias = methodsAliases[index];
+                        const methodAlias = dataAliases[index];
 
                         this._methodsData[methodAlias] = item;
                     })
@@ -30,30 +30,30 @@ module.exports = class {
         return result.then(() => this._methodsData);
     }
 
-    _getMethodsAliasesLevels() {
+    _getDataAliasesLevels() {
         const methods = this._methods;
         const result = [];
 
-        function setDepsLevels(methodAlias, index) {
-            const method = methods[methodAlias];
+        function setDepsLevels(dataAlias, index) {
+            const method = methods[dataAlias].method;
 
             if (!method) {
-                throw new Error(`Can't resolve "${methodAlias}" dependency`);
+                throw new Error(`Can't resolve "${dataAlias}" dependency`);
             }
 
-            const depsMethodsAliases = [].concat(method.deps || []);
+            const depsDataAliases = [].concat(method.deps || []);
 
             if (!result[index]) {
                 result[index] = [];
             }
 
-            if (!result[index].includes(methodAlias)) {
-                result[index].push(methodAlias);
+            if (!result[index].includes(dataAlias)) {
+                result[index].push(dataAlias);
             }
 
-            if (depsMethodsAliases.length) {
+            if (depsDataAliases.length) {
 
-                depsMethodsAliases.map(depsMethodAlias => {
+                depsDataAliases.map(depsMethodAlias => {
                     setDepsLevels(depsMethodAlias, index + 1);
                 });
             }
@@ -61,36 +61,30 @@ module.exports = class {
 
         Object
             .keys(methods)
-            .forEach((methodAlias, index) => {
-                setDepsLevels(methodAlias, 0);
+            .forEach((dataAlias, index) => {
+                setDepsLevels(dataAlias, 0);
             });
 
         return result.reverse();
     }
 
-    _callMethodsLevel(methodsAliases) {
-        return methodsAliases.map(methodAlias => {
-            const method = this._methods[methodAlias];
-            const methodKey = method.key || methodAlias;
-            const methodsData = this._methodsData;
+    _callMethods(dataAliases) {
+        return dataAliases.map(dataAlias => {
+            const method = this._methods[dataAlias].method;
+            // const methodsData = this._methodsData;
+            //
+            // if (methodsData[dataAlias]) {
+            //     return methodsData[dataAlias];
+            // }
 
-            if (methodsData[methodKey]) {
-                return methodsData[methodKey];
-            }
-
-            return this._callResourceMethod(methodAlias);
+            return this._callMethod(dataAlias);
         });
     }
 
-    _callResourceMethod(methodAlias) { // todo: methodAlias
-        const method = this._methods[methodAlias];
-        const resourceSep = ':'; // todo
-        const rawName = method.name;
+    _callMethod(dataAlias) {
+        const data = this._methods[dataAlias];
+        const method = data.method;
         let result;
-
-        if (rawName.indexOf(resourceSep) === -1) {
-            throw new Error(`Do not specify the type of the method. Method: "${rawName}"`);
-        }
 
         const depsData = this._getMethodDepsData(method);
 
@@ -99,19 +93,15 @@ module.exports = class {
         }
 
         if (method.guard === undefined || method.guard) {
-            const rawNameParams = rawName.split(':');
-            const resourceName = rawNameParams[0];
-            const methodName = rawNameParams[1];
+            logger.info('Call:', dataAlias, JSON.stringify(data));
 
-            this._saveResource(resourceName);
-            method.args = this._getMethodArgs(method);
-            result = this._resources[resourceName].call(methodName, method.args || {});
+            method.params = this._getMethodParams(method);
+            result = resource.callMethod(data.resource, method.params);
 
             this.addCallbackAfter(result, method);
-
-            logger.info('Call:', methodAlias, JSON.stringify(method));
         } else {
-            logger.info('Guard:', methodAlias, JSON.stringify(method)); // TODO
+            logger.info('Guard:', dataAlias, JSON.stringify(data)); // TODO
+
             result = Promise.resolve(); // TODO
         }
 
@@ -121,28 +111,19 @@ module.exports = class {
     _getMethodDepsData(method) {
         const deps = [].concat(method.deps || []);
 
-        return deps.reduce((result, methodAlias) => {
+        return deps.reduce((result, dataAlias) => {
             return Object.assign(result, {
-                [methodAlias]: this._methodsData[methodAlias]
+                [dataAlias]: this._methodsData[dataAlias]
             });
         }, {});
     }
 
-    _saveResource(resourceName) {
+    _getMethodParams(method) {
 
-        if (!this._resources[resourceName]) {
-            // eslint-disable-next-line global-require
-            const Resource = require('./resources/' + resourceName);
-
-            this._resources[resourceName] = new Resource();
+        if (typeof method.params !== 'function') {
+            return method.params;
         }
-    }
 
-    _getMethodArgs(method) {
-
-        if (typeof method.args !== 'function') {
-            return method.args;
-        }
         const deps = [].concat(method.deps || []);
         const depsData = deps.reduce((result, methodAlias) => {
             return Object.assign(result, {
@@ -150,7 +131,7 @@ module.exports = class {
             });
         }, {});
 
-        return method.args(depsData);
+        return method.params(depsData);
     }
 
     addCallbackAfter(result, method) {
