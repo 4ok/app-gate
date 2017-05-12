@@ -5,9 +5,7 @@
   "engines": {
     "node": ">=4.0.0"
   },
-  "dependencies": {
-    "app-data": "git://github.com/4ok/app-data.git"
-  },
+  "dependencies": {},
   "devDependencies": {
     "eslint": "^3.0.1",
     "eslint-config-4ok": "git://github.com/4ok/eslint-config-4ok",
