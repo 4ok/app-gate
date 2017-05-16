@@ -7,7 +7,7 @@ module.exports = class {
     }
 
     callMethod(resourceData, methodParams) {
-        const resource = this.getResource(resourceData.name);
+        const resource = this.getResource(resourceData.resource);
 
         return resource.callMethod(resourceData.params, methodParams);
     }
