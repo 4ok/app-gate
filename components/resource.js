@@ -1,5 +1,3 @@
-const Resource = require('app-resource-default');
-
 module.exports = class {
 
     constructor() {
@@ -16,6 +14,7 @@ module.exports = class {
 
         if (!this._resources[name]) {
             const resourcePath = 'app-resource-' + name;
+            // eslint-disable-next-line import/no-dynamic-require
             const Resource = require(resourcePath);
 
             this._resources[name] = new Resource;

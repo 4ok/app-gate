@@ -1,5 +1,6 @@
 const logger = require('logger')();
 const Resource = require('./components/resource');
+
 const resource = new Resource();
 
 module.exports = class {
@@ -34,7 +35,7 @@ module.exports = class {
         const methods = this._methods;
         const result = [];
 
-        function setDepsLevels(dataAlias, index) {
+        function setDepsLevels(dataAlias, index = 0) {
             const method = methods[dataAlias].method;
 
             if (!method) {
@@ -61,8 +62,8 @@ module.exports = class {
 
         Object
             .keys(methods)
-            .forEach((dataAlias, index) => {
-                setDepsLevels(dataAlias, 0);
+            .forEach(dataAlias => {
+                setDepsLevels(dataAlias);
             });
 
         return result.reverse();
@@ -70,7 +71,8 @@ module.exports = class {
 
     _callMethods(dataAliases) {
         return dataAliases.map(dataAlias => {
-            const method = this._methods[dataAlias].method;
+            // todo: cache
+            // const method = this._methods[dataAlias].method;
             // const methodsData = this._methodsData;
             //
             // if (methodsData[dataAlias]) {
