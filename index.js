@@ -14,17 +14,15 @@ module.exports = class {
         const dataAliasesLevels = this._getDataAliasesLevels();
         let result = Promise.resolve();
 
-        dataAliasesLevels.forEach(dataAliases => {
+        dataAliasesLevels.forEach((dataAliases) => {
             result = result
-                .then(() => Promise.all(
-                    this._callMethods(dataAliases)
-                ))
-                .then(items => {
+                .then(() => Promise.all(this._callMethods(dataAliases)))
+                .then((items) => {
                     items.forEach((item, index) => {
                         const methodAlias = dataAliases[index];
 
                         this._methodsData[methodAlias] = item;
-                    })
+                    });
                 });
         });
 
@@ -36,7 +34,7 @@ module.exports = class {
         const result = [];
 
         function setDepsLevels(dataAlias, index = 0) {
-            const method = methods[dataAlias].method;
+            const { method } = methods[dataAlias];
 
             if (!method) {
                 throw new Error(`Can't resolve "${dataAlias}" dependency`);
@@ -54,7 +52,7 @@ module.exports = class {
 
             if (depsDataAliases.length) {
 
-                depsDataAliases.map(depsMethodAlias => {
+                depsDataAliases.forEach((depsMethodAlias) => {
                     setDepsLevels(depsMethodAlias, index + 1);
                 });
             }
@@ -62,30 +60,30 @@ module.exports = class {
 
         Object
             .keys(methods)
-            .forEach(dataAlias => {
-                setDepsLevels(dataAlias);
-            });
+            .forEach(dataAlias => setDepsLevels(dataAlias));
 
         return result.reverse();
     }
 
     _callMethods(dataAliases) {
-        return dataAliases.map(dataAlias => {
-            // todo: cache
-            // const method = this._methods[dataAlias].method;
-            // const methodsData = this._methodsData;
-            //
-            // if (methodsData[dataAlias]) {
-            //     return methodsData[dataAlias];
-            // }
+        return dataAliases.map(dataAlias => this._callMethod(dataAlias));
 
-            return this._callMethod(dataAlias);
-        });
+        // todo: cache
+        // return dataAliases.map((dataAlias) => {
+        //     const method = this._methods[dataAlias].method;
+        //     const methodsData = this._methodsData;
+        //
+        //     if (methodsData[dataAlias]) {
+        //         return methodsData[dataAlias];
+        //     }
+        //
+        //     return this._callMethod(dataAlias);
+        // });
     }
 
     _callMethod(dataAlias) {
         const data = this._methods[dataAlias];
-        const method = data.method;
+        const { method } = data.method;
         let result;
 
         const depsData = this._getMethodDepsData(method);
@@ -113,11 +111,9 @@ module.exports = class {
     _getMethodDepsData(method) {
         const deps = [].concat(method.deps || []);
 
-        return deps.reduce((result, dataAlias) => {
-            return Object.assign(result, {
-                [dataAlias]: this._methodsData[dataAlias]
-            });
-        }, {});
+        return deps.reduce((result, dataAlias) => Object.assign(result, {
+            [dataAlias]: this._methodsData[dataAlias],
+        }), {});
     }
 
     _getMethodParams(method) {
@@ -127,22 +123,19 @@ module.exports = class {
         }
 
         const deps = [].concat(method.deps || []);
-        const depsData = deps.reduce((result, methodAlias) => {
-            return Object.assign(result, {
-                [methodAlias]: this._methodsData[methodAlias]
-            });
-        }, {});
+        const depsData = deps.reduce((result, methodAlias) => Object.assign(result, {
+            [methodAlias]: this._methodsData[methodAlias],
+        }), {});
 
         return method.params(depsData);
     }
 
+    // eslint-disable-next-line class-methods-use-this
     addCallbackAfter(result, method) {
-        const after = method.after;
+        const { after } = method;
 
         if (after) {
-            result.then(data => {
-                after.call(after, data);
-            });
+            result.then(data => after.call(after, data));
         }
     }
 };

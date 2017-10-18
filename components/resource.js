@@ -14,10 +14,10 @@ module.exports = class {
 
         if (!this._resources[name]) {
             const resourcePath = 'app-resource-' + name;
-            // eslint-disable-next-line import/no-dynamic-require
+            // eslint-disable-next-line global-require, import/no-dynamic-require
             const Resource = require(resourcePath);
 
-            this._resources[name] = new Resource;
+            this._resources[name] = new Resource();
         }
 
         return this._resources[name];
