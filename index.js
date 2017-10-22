@@ -83,7 +83,7 @@ module.exports = class {
 
     _callMethod(dataAlias) {
         const data = this._methods[dataAlias];
-        const { method } = data.method;
+        const { method } = data;
         let result;
 
         const depsData = this._getMethodDepsData(method);
