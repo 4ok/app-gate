@@ -6,8 +6,8 @@
     "node": ">=4.0.0"
   },
   "dependencies": {
-    "logger": "github:4ok/logger.git",
-    "app-resource-default": "github:4ok/app-resource-default.git"
+    "logger": "github:4ok/logger",
+    "app-resource-default": "github:4ok/app-resource-default"
   },
   "devDependencies": {
     "eslint": "^4.9.0",
